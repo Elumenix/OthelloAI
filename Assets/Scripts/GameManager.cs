@@ -12,10 +12,13 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Disc whiteDisc;
 
+    [SerializeField] private GameObject highlightPrefab;
+
     private Dictionary<Player, Disc> discPrefabs = new Dictionary<Player, Disc>();
     private GameState gameState = new GameState();
     private Disc[,] discs = new Disc[8, 8];
     private bool canMove = true; // TODO: If problems with speeding up the game occur, remove this, it's optional
+    private List<GameObject> highlights = new List<GameObject>();
     
     
     // Start is called before the first frame update
@@ -25,6 +28,7 @@ public class GameManager : MonoBehaviour
         discPrefabs[Player.White] = whiteDisc;
         
         AddStartDiscs();
+        ShowLegalMoves();
     }
     
     // Update is called once per frame
@@ -48,6 +52,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void ShowLegalMoves()
+    {
+        foreach (Position boardPos in gameState.LegalMoves.Keys)
+        {
+            Vector3 scenePos = BoardToScenePos(boardPos) + Vector3.up * 0.01f;
+            GameObject highlight = Instantiate(highlightPrefab, scenePos, Quaternion.identity);
+            highlights.Add(highlight);
+        }
+    }
+
+    private void HideLegalMoves()
+    {
+        highlights.ForEach(Destroy);
+        highlights.Clear();
+    }
+
     private void OnBoardClicked(Position boardPos)
     {
         if (!canMove)
@@ -64,7 +84,9 @@ public class GameManager : MonoBehaviour
     private IEnumerator OnMoveMade(MoveInfo moveInfo)
     {
         canMove = false;
+        HideLegalMoves();
         yield return ShowMove(moveInfo);
+        ShowLegalMoves();
         canMove = true;
     }
 
