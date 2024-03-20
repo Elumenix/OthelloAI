@@ -153,9 +153,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 963194227}
-  boardLayer:
-    serializedVersion: 2
-    m_Bits: 8
   blackDisc: {fileID: 2609493128917965306, guid: f7ca6f1745c9d2b42a3bab844a1d0c50, type: 3}
   whiteDisc: {fileID: 7713688156690653559, guid: 0fa8e8ed607910f489ee16029878b858, type: 3}
   highlightPrefab: {fileID: 7190539527357045089, guid: 73d345279b2f10241a7a53f3499947a5, type: 3}
@@ -241,37 +238,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8de9620b2423ea04496cc1e18475c9a2, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 629173893}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8de9620b2423ea04496cc1e18475c9a2, type: 3}
---- !u!1 &629173892 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 8de9620b2423ea04496cc1e18475c9a2, type: 3}
-  m_PrefabInstance: {fileID: 629173891}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &629173893
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 629173892}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 8, y: 0.5, z: 8}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
