@@ -55,11 +55,11 @@ public class MCTS : MonoBehaviour
         List<Position> expectedChildren = node.State.LegalMoves.Keys.ToList();
 
         // Clone the next available child
-        MoveInfo move; // Unused but I need to respect the out statement
         GameState state = node.State.Clone();
         
         // The correct position index will always align to the count of the current processed children. convenient
-        state.MakeMove(expectedChildren[node.Children.Count], out move);
+        state.MakeMove(expectedChildren[node.Children.Count], out MoveInfo move);
+        // MoveInfo is only ever used to display things on board, which is why I can safely ignore it
         MCTSNode child = new MCTSNode(state, expectedChildren[node.Children.Count], node);
         node.AddChild(child);
 

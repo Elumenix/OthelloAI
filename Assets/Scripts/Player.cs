@@ -3,6 +3,11 @@
     None, Black, White
 }
 
+public enum PlayerControlOptions
+{
+    Player, Random, MCTS
+}
+
 public static class PlayerExtensions
 {
     public static Player Opponent(this Player player)

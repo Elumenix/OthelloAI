@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -12,15 +13,24 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject highlightPrefab;
 
+    [SerializeField] private PlayerControlOptions BlackController;
+    
+    [SerializeField] private PlayerControlOptions WhiteController;
+
+    [SerializeField] private float TimeScale = 1;
+
+
     private Dictionary<Player, Disc> discPrefabs = new Dictionary<Player, Disc>();
     private GameState gameState = new GameState();
     private Disc[,] discs = new Disc[8, 8];
     private List<GameObject> highlights = new List<GameObject>();
+    private float AITimer = 0;
     
     
     // Start is called before the first frame update
     private void Start()
     {
+        Time.timeScale = TimeScale;
         discPrefabs[Player.Black] = blackDisc;
         discPrefabs[Player.White] = whiteDisc;
         
@@ -31,26 +41,68 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        AITimer += Time.deltaTime;
+        Time.timeScale = TimeScale;
+        
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
 
-        if (Input.GetMouseButtonDown(0))
+        // Check if color is player controlled
+        if ((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.Player) ||
+            gameState.CurrentPlayer == Player.White && WhiteController == PlayerControlOptions.Player)
         {
-            Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            if (Input.GetMouseButtonDown(0))
             {
-                Vector3 impact = hitInfo.point;
-                Position boardPos = SceneToBoardPos(impact);
-                OnBoardClicked(boardPos);
+                Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hitInfo))
+                {
+                    Vector3 impact = hitInfo.point;
+                    Position boardPos = SceneToBoardPos(impact);
+                    OnBoardClicked(boardPos);
+                    
+                    // Reset to 0, not subtraction because AI doesn't need to keep tempo with the player
+                    AITimer = 0; 
+                }
+            }
+        }
+        else // Allow AI to Take Over
+        {
+            // Wait for next update
+            if (AITimer < 1f)
+            {
+                return;
+            }
+            
+            // Check if using MCTS
+            if ((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.MCTS) ||
+                gameState.CurrentPlayer == Player.White && WhiteController == PlayerControlOptions.MCTS)
+            {
+                AITimer -= 1f;
+            }
+            else // Random placement
+            {
+                List<Position> potentialMoves = gameState.LegalMoves.Keys.ToList();
+
+                if (potentialMoves.Count > 0)
+                {
+                    gameState.MakeMove(potentialMoves[Random.Range(0, potentialMoves.Count)], out MoveInfo moveInfo);
+                    StartCoroutine(OnMoveMade(moveInfo));
+                }
+
+                AITimer -= 1f;
             }
         }
     }
 
     private void ShowLegalMoves()
     {
+        // Only show legal moves if the current color is player controlled
+        if (!((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.Player) ||
+              gameState.CurrentPlayer == Player.White && WhiteController == PlayerControlOptions.Player)) return;
+            
         foreach (Position boardPos in gameState.LegalMoves.Keys)
         {
             Vector3 scenePos = BoardToScenePos(boardPos) + Vector3.up * 0.01f;
