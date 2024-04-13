@@ -7,8 +7,8 @@ public class GameState
     public const int Rows = 8;
     public const int Columns = 8;
     
-    public Player[,] Board { get; }
-    public Dictionary<Player, int> DiscCount { get; }
+    public Player[,] Board { get; private set; }
+    public Dictionary<Player, int> DiscCount { get; private set; }
     public Player CurrentPlayer { get; private set; }
     public bool GameOver { get; private set; }
     public Player Winner { get; private set; }
@@ -198,5 +198,23 @@ public class GameState
         }
 
         return legalMoves;
+    }
+
+    public GameState Clone()
+    {
+        // Allows for passing variables to private fields
+        GameState reference = this;
+
+        GameState clone = new GameState()
+        {
+            CurrentPlayer = reference.CurrentPlayer,
+            LegalMoves = reference.LegalMoves,
+            Winner = reference.Winner,
+            DiscCount = reference.DiscCount,
+            GameOver = reference.GameOver,
+            Board = reference.Board
+        };
+        
+        return clone;
     }
 }
