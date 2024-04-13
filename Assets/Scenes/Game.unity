@@ -157,8 +157,8 @@ MonoBehaviour:
   whiteDisc: {fileID: 7713688156690653559, guid: 0fa8e8ed607910f489ee16029878b858, type: 3}
   highlightPrefab: {fileID: 7190539527357045089, guid: 73d345279b2f10241a7a53f3499947a5, type: 3}
   BlackController: 1
-  WhiteController: 1
-  TimeScale: 5
+  WhiteController: 2
+  TimeScale: 1
 --- !u!4 &169642974
 Transform:
   m_ObjectHideFlags: 0

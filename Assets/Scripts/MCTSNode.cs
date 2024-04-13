@@ -28,15 +28,16 @@ public class MCTSNode
         Children.Add(child);
     }
     
-    public void Update()
+    public void Update(int wins)
     {
         Visits++;
+        Wins += wins;
     }
     
     public MCTSNode BestChild()
     {
         return Children
-            .OrderByDescending(c => (float) c.Wins / c.Visits + Mathf.Sqrt(2f * Mathf.Log(Parent.Visits) / c.Visits))
-            .First();
+            .OrderByDescending(c =>
+                (float) c.Wins / c.Visits + Mathf.Sqrt(2f * Mathf.Log(Parent?.Visits ?? Visits) / c.Visits)).First();
     }
 }

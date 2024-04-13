@@ -212,7 +212,7 @@ public class GameState
             Winner = reference.Winner,
             DiscCount = reference.DiscCount,
             GameOver = reference.GameOver,
-            Board = reference.Board
+            Board = (Player[,]) reference.Board.Clone()
         };
         
         return clone;

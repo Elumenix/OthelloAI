@@ -8,25 +8,21 @@ public class MCTS : MonoBehaviour
 {
     private MCTSNode root;
     
-    public MCTS(GameState initialState)
+    public Position CalculateBestMove(GameState initialState, int iterations)
     {
-        root = new MCTSNode(initialState);
-    }
-    
-    
-    public MoveInfo CalculateBestMove(int iterations)
-    {
-        MoveInfo move = new MoveInfo();
-
+        root = new MCTSNode(initialState.Clone());
+        
         for (int i = 0; i < iterations; i++)
         {
             MCTSNode node = SelectMove(root);
+            int result = Simulate(node);
+            BackPropagate(node, result);
         }
  
-        return move;
+        return root.BestChild().Move;
     }
-
-
+    
+    
     private MCTSNode SelectMove(MCTSNode parent)
     {
         // Makes sure moves can still be played
@@ -64,5 +60,33 @@ public class MCTS : MonoBehaviour
         node.AddChild(child);
 
         return child;
+    }
+
+
+    private int Simulate(MCTSNode node)
+    {
+        GameState state = node.State.Clone();
+        
+        // Makes sure moves can still be played
+        while (!(state.GameOver || state.LegalMoves.Count == 0))
+        {
+            // Keep making random moves and see who wins
+            List<Position> moves = state.LegalMoves.Keys.ToList();
+            state.MakeMove(moves[Random.Range(0, moves.Count)], out MoveInfo moveInfo);
+        }
+        
+        // Send back weather our favoured player won or lost
+        return state.Winner == root.State.CurrentPlayer ? 1 : 0;
+    }
+
+    
+    private void BackPropagate(MCTSNode node, int result)
+    {
+        while (node != null)
+        {
+            // pass in potential wins and go back up the tree
+            node.Update(result);
+            node = node.Parent;
+        }
     }
 }

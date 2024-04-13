@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     private Disc[,] discs = new Disc[8, 8];
     private List<GameObject> highlights = new List<GameObject>();
     private float AITimer = 0;
+    private MCTS AI;
     
     
     // Start is called before the first frame update
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = TimeScale;
         discPrefabs[Player.Black] = blackDisc;
         discPrefabs[Player.White] = whiteDisc;
+        AI = gameObject.AddComponent<MCTS>();
         
         AddStartDiscs();
         ShowLegalMoves();
@@ -71,7 +73,7 @@ public class GameManager : MonoBehaviour
         else // Allow AI to Take Over
         {
             // Wait for next update
-            if (AITimer < 1f)
+            if (AITimer < 1f || gameState.GameOver)
             {
                 return;
             }
@@ -80,6 +82,11 @@ public class GameManager : MonoBehaviour
             if ((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.MCTS) ||
                 gameState.CurrentPlayer == Player.White && WhiteController == PlayerControlOptions.MCTS)
             {
+                Position nextMove = AI.CalculateBestMove(gameState, 1000);
+                // MCTS algorithm is ran to predict the best move for the current player
+                gameState.MakeMove(nextMove, out MoveInfo moveInfo); 
+                StartCoroutine(OnMoveMade(moveInfo));
+                
                 AITimer -= 1f;
             }
             else // Random placement
