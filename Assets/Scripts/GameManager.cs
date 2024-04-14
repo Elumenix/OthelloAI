@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 
@@ -20,15 +21,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int numIterations = 1000;
 
     [SerializeField] private float TimeScale = 1;
-
-    [SerializeField] private int numThreads = 4;
-
+    
 
     private Dictionary<Player, Disc> discPrefabs = new Dictionary<Player, Disc>();
     private GameState gameState = new GameState();
     private Disc[][] discs = new Disc[8][];
     private List<GameObject> highlights = new List<GameObject>();
-    private float AITimer = 0;
+    private float AITimer = 1; // Lets things start quicker
     private MCTS AI;
     
     
@@ -82,7 +81,7 @@ public class GameManager : MonoBehaviour
         else // Allow AI to Take Over
         {
             // Wait for next update
-            if (AITimer < 1f || gameState.GameOver)
+            if (AITimer < 1.33f || gameState.GameOver)
             {
                 return;
             }
@@ -91,12 +90,13 @@ public class GameManager : MonoBehaviour
             if ((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.MCTS) ||
                 gameState.CurrentPlayer == Player.White && WhiteController == PlayerControlOptions.MCTS)
             {
-                Position nextMove = AI.CalculateBestMove(gameState, numIterations, numThreads);
+                Position nextMove = AI.CalculateBestMove(gameState, numIterations);
                 // MCTS algorithm is ran to predict the best move for the current player
-                gameState.MakeMove(nextMove, out MoveInfo moveInfo); 
+                gameState.MakeMove(nextMove, out MoveInfo moveInfo);
+                
                 StartCoroutine(OnMoveMade(moveInfo));
                 
-                AITimer -= 1f;
+                AITimer -= 1.33f;
             }
             else // Random placement
             {
@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(OnMoveMade(moveInfo));
                 }
 
-                AITimer -= 1f;
+                AITimer -= 1.33f;
             }
         }
     }
