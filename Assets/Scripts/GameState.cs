@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 public class GameState
 {
@@ -12,9 +14,19 @@ public class GameState
     public bool GameOver { get; private set; }
     public Player Winner { get; private set; }
     public Dictionary<Position, List<Position>> LegalMoves { get; private set; }
+
+    private List<int> winners;
+    private List<int> blackScores;
+    private List<int> whiteScores;
+    public bool isMCTSNode = false;
     
     public GameState()
     {
+        // Black, Tie, White
+        winners = new List<int>() {0, 0, 0};
+        blackScores = new List<int>();
+        whiteScores = new List<int>();
+        
         // Assuming the Top Left is (0,0)
         Board = new Player[Rows][];
 
@@ -121,6 +133,7 @@ public class GameState
         {
             CurrentPlayer = Player.None;
             GameOver = true;
+            
             Winner = FindWinner();
         }
     }
@@ -204,7 +217,81 @@ public class GameState
 
         return legalMoves;
     }
+    
+    // Update tracked variables and output to console
+    public void HandleGameOver(int gameNum)
+    {
+        blackScores.Add(DiscCount[Player.Black]);
+        whiteScores.Add(DiscCount[Player.White]);
 
+        float cumulativeBlack = 0;
+
+        for (int i = 0; i < blackScores.Count; i++)
+        {
+            cumulativeBlack += blackScores[i];
+        }
+
+        cumulativeBlack /= blackScores.Count;
+        
+        
+        float cumulativeWhite = 0;
+
+        for (int i = 0; i < whiteScores.Count; i++)
+        {
+            cumulativeWhite += whiteScores[i];
+        }
+
+        cumulativeWhite /= whiteScores.Count;
+
+        if (Winner == Player.Black)
+        {
+            winners[0]++;
+        }
+        else if (Winner == Player.White)
+        {
+            winners[2]++;
+        }
+        else
+        {
+            winners[1]++;
+        }
+        
+        // Build string of Information I want output to the console at the end of each game
+        Debug.Log("Game " + (gameNum + 1) + " Winner: " + Winner);
+        Debug.Log("Black Score: " + DiscCount[Player.Black] + ", White Score: " + DiscCount[Player.White]);
+        Debug.Log("Total Games Won: Black " + winners[0] + ", White " + winners[2] + ", Ties " + winners[1]);
+        Debug.Log("Average Scores: Black " + cumulativeBlack + ", White " + cumulativeWhite);
+
+
+        gameNum++;
+        if (gameNum < 500) // Play 500 Games
+        {
+            // Essentially rerunning the constructor code to restart the game
+            
+            Board = new Player[Rows][];
+
+            for (int i = 0; i < Rows; i++)
+            {
+                Board[i] = new Player[Columns];
+            }
+
+            Board[3][3] = Player.White;
+            Board[3][4] = Player.Black;
+            Board[4][3] = Player.Black;
+            Board[4][4] = Player.White;
+
+            DiscCount = new Dictionary<Player, int>()
+            {
+                {Player.Black, 2},
+                {Player.White, 2}
+            };
+
+            CurrentPlayer = Player.Black;
+            LegalMoves = FindLegalMoves(CurrentPlayer);
+            GameOver = false; // Keep going
+        }
+    }
+    
     public GameState Clone()
     {
         // Allows for passing variables to private fields

@@ -16,6 +16,12 @@ public class Disc : MonoBehaviour
 
     public void Flip()
     {
+        // Gameobject might have been destroyed if game is restarting
+        if (animator == null) 
+        {
+            return;
+        }
+        
         if (up == Player.Black)
         {
             animator.Play("BlackToWhite");

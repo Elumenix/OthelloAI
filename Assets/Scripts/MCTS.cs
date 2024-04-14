@@ -15,6 +15,7 @@ public class MCTS
     public Position CalculateBestMove(GameState initialState, int iterations)
     {
         root = new MCTSNode(initialState.Clone());
+        root.State.isMCTSNode = true;
 
         for (int i = 0; i < iterations; i++)
         {

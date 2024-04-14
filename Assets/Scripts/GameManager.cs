@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     private List<GameObject> highlights = new List<GameObject>();
     private float AITimer = 1; // Lets things start quicker
     private MCTS AI;
+    private int games;
     
     
     // Start is called before the first frame update
@@ -58,6 +59,37 @@ public class GameManager : MonoBehaviour
         {
             Application.Quit();
         }
+        
+        
+        // Handle Game Overs
+        if (gameState.GameOver && games < 500)
+        {
+            // Need to make space for next game
+            if (games + 1 < 500)
+            {
+                foreach (Disc[] discArrays in discs)
+                {
+                    foreach (Disc disc in discArrays)    
+                    {
+                        if (disc == null)
+                        {
+                            continue;
+                        }
+                        Destroy(disc.gameObject);
+                    }
+                }
+            }
+            
+            gameState.HandleGameOver(games);
+            games++;
+
+            // Should happen after discs are deleted and game variables are reset
+            if (games < 500)
+            {
+                AddStartDiscs();
+            }
+        }
+        
 
         // Check if color is player controlled
         if ((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.Player) ||
