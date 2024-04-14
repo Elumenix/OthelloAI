@@ -158,7 +158,9 @@ MonoBehaviour:
   highlightPrefab: {fileID: 7190539527357045089, guid: 73d345279b2f10241a7a53f3499947a5, type: 3}
   BlackController: 1
   WhiteController: 2
+  numIterations: 100
   TimeScale: 1
+  numThreads: 4
 --- !u!4 &169642974
 Transform:
   m_ObjectHideFlags: 0

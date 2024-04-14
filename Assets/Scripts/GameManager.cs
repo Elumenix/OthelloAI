@@ -16,13 +16,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerControlOptions BlackController;
     
     [SerializeField] private PlayerControlOptions WhiteController;
+    
+    [SerializeField] private int numIterations = 1000;
 
     [SerializeField] private float TimeScale = 1;
+
+    [SerializeField] private int numThreads = 4;
 
 
     private Dictionary<Player, Disc> discPrefabs = new Dictionary<Player, Disc>();
     private GameState gameState = new GameState();
-    private Disc[,] discs = new Disc[8, 8];
+    private Disc[][] discs = new Disc[8][];
     private List<GameObject> highlights = new List<GameObject>();
     private float AITimer = 0;
     private MCTS AI;
@@ -34,7 +38,12 @@ public class GameManager : MonoBehaviour
         Time.timeScale = TimeScale;
         discPrefabs[Player.Black] = blackDisc;
         discPrefabs[Player.White] = whiteDisc;
-        AI = gameObject.AddComponent<MCTS>();
+        AI = new MCTS();
+
+        for (int i = 0; i < 8; i++)
+        {
+            discs[i] = new Disc[8];
+        }
         
         AddStartDiscs();
         ShowLegalMoves();
@@ -82,7 +91,7 @@ public class GameManager : MonoBehaviour
             if ((gameState.CurrentPlayer == Player.Black && BlackController == PlayerControlOptions.MCTS) ||
                 gameState.CurrentPlayer == Player.White && WhiteController == PlayerControlOptions.MCTS)
             {
-                Position nextMove = AI.CalculateBestMove(gameState, 1000);
+                Position nextMove = AI.CalculateBestMove(gameState, numIterations, numThreads);
                 // MCTS algorithm is ran to predict the best move for the current player
                 gameState.MakeMove(nextMove, out MoveInfo moveInfo); 
                 StartCoroutine(OnMoveMade(moveInfo));
@@ -91,11 +100,11 @@ public class GameManager : MonoBehaviour
             }
             else // Random placement
             {
-                List<Position> potentialMoves = gameState.LegalMoves.Keys.ToList();
+                Position[] potentialMoves = gameState.LegalMoves.Keys.ToArray();
 
-                if (potentialMoves.Count > 0)
+                if (potentialMoves.Length > 0)
                 {
-                    gameState.MakeMove(potentialMoves[Random.Range(0, potentialMoves.Count)], out MoveInfo moveInfo);
+                    gameState.MakeMove(potentialMoves[Random.Range(0, potentialMoves.Length)], out MoveInfo moveInfo);
                     StartCoroutine(OnMoveMade(moveInfo));
                 }
 
@@ -154,14 +163,14 @@ public class GameManager : MonoBehaviour
     private void SpawnDisc(Disc prefab, Position boardPos)
     {
         Vector3 scenePos = BoardToScenePos(boardPos) + Vector3.up * 0.1f;
-        discs[boardPos.Row, boardPos.Column] = Instantiate(prefab, scenePos, Quaternion.identity);
+        discs[boardPos.Row][boardPos.Column] = Instantiate(prefab, scenePos, Quaternion.identity);
     }
 
     private void AddStartDiscs()
     {
         foreach (Position boardPos in gameState.OccupiedPositions())
         {
-            Player player = gameState.Board[boardPos.Row, boardPos.Column];
+            Player player = gameState.Board[boardPos.Row][boardPos.Column];
             SpawnDisc(discPrefabs[player], boardPos);
         }
     }
@@ -170,14 +179,14 @@ public class GameManager : MonoBehaviour
     {
         foreach (Position boardPos in positions)
         {
-            discs[boardPos.Row, boardPos.Column].Flip();
+            discs[boardPos.Row][boardPos.Column].Flip();
         }
     }
 
     private IEnumerator ShowMove(MoveInfo moveInfo)
     {
         SpawnDisc(discPrefabs[moveInfo.Player], moveInfo.Position);
-        yield return new WaitForSeconds(0.33f); // TODO: Check if tick rate affects this
+        yield return new WaitForSeconds(0.33f); 
         FlipDiscs(moveInfo.Outflanked);
         yield return new WaitForSeconds(0.83f);
     }

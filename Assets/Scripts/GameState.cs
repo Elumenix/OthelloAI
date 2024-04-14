@@ -1,13 +1,12 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
+using System.Linq;
 
 public class GameState
 {
     public const int Rows = 8;
     public const int Columns = 8;
     
-    public Player[,] Board { get; private set; }
+    public Player[][] Board { get; private set; }
     public Dictionary<Player, int> DiscCount { get; private set; }
     public Player CurrentPlayer { get; private set; }
     public bool GameOver { get; private set; }
@@ -17,11 +16,17 @@ public class GameState
     public GameState()
     {
         // Assuming the Top Left is (0,0)
-        Board = new Player[Rows, Columns];
-        Board[3, 3] = Player.White;
-        Board[3, 4] = Player.Black;
-        Board[4, 3] = Player.Black;
-        Board[4, 4] = Player.White;
+        Board = new Player[Rows][];
+
+        for (int i = 0; i < Rows; i++)
+        {
+            Board[i] = new Player[Columns];
+        }
+
+        Board[3][3] = Player.White;
+        Board[3][4] = Player.Black;
+        Board[4][3] = Player.Black;
+        Board[4][4] = Player.White;
 
         DiscCount = new Dictionary<Player, int>()
         {
@@ -44,7 +49,7 @@ public class GameState
         Player movePlayer = CurrentPlayer;
         List<Position> outflanked = LegalMoves[pos];
 
-        Board[pos.Row, pos.Column] = movePlayer;
+        Board[pos.Row][pos.Column] = movePlayer;
         FlipDiscs(outflanked); // flip discs
         UpdateDiscCounts(movePlayer, outflanked.Count);// update disc counts
         PassTurn(); // pass turn or end game
@@ -59,7 +64,7 @@ public class GameState
         {
             for (int c = 0; c < Columns; c++)
             {
-                if (Board[r, c] != Player.None)
+                if (Board[r][c] != Player.None)
                 {
                     yield return new Position(r, c);
                 }
@@ -71,7 +76,7 @@ public class GameState
     {
         foreach (Position pos in positions)
         {
-            Board[pos.Row, pos.Column] = Board[pos.Row, pos.Column].Opponent();
+            Board[pos.Row][pos.Column] = Board[pos.Row][pos.Column].Opponent();
         }
     }
 
@@ -131,9 +136,9 @@ public class GameState
         int r = pos.Row + rowOffset;
         int c = pos.Column + columnOffset;
 
-        while (IsInsideBoard(r, c) && Board[r, c] != Player.None)
+        while (IsInsideBoard(r, c) && Board[r][c] != Player.None)
         {
-            if (Board[r, c] == player.Opponent())
+            if (Board[r][c] == player.Opponent())
             {
                 outflanked.Add(new Position(r, c));
                 r += rowOffset;
@@ -170,7 +175,7 @@ public class GameState
 
     private bool IsMoveLegal(Player player, Position pos, out List<Position> outflanked)
     {
-        if (Board[pos.Row, pos.Column] != Player.None)
+        if (Board[pos.Row][pos.Column] != Player.None)
         {
             outflanked = null;
             return false;
@@ -210,9 +215,9 @@ public class GameState
             CurrentPlayer = reference.CurrentPlayer,
             LegalMoves = reference.LegalMoves,
             Winner = reference.Winner,
-            DiscCount = reference.DiscCount,
+            DiscCount = reference.DiscCount.ToDictionary(entry => entry.Key, entry => entry.Value),
             GameOver = reference.GameOver,
-            Board = (Player[,]) reference.Board.Clone()
+            Board = reference.Board.Select(s=> s.ToArray()).ToArray()
         };
         
         return clone;
