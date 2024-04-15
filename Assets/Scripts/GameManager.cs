@@ -64,29 +64,35 @@ public class GameManager : MonoBehaviour
         // Handle Game Overs
         if (gameState.GameOver && games < 500)
         {
-            // Need to make space for next game
-            if (games + 1 < 500)
+            bool dontReset = BlackController == PlayerControlOptions.Player || WhiteController == PlayerControlOptions.Player;
+
+            if (!dontReset)
             {
-                foreach (Disc[] discArrays in discs)
+                // Need to make space for next game
+                if (games + 1 < 500)
                 {
-                    foreach (Disc disc in discArrays)    
+                    foreach (Disc[] discArrays in discs)
                     {
-                        if (disc == null)
+                        foreach (Disc disc in discArrays)
                         {
-                            continue;
+                            if (disc == null)
+                            {
+                                continue;
+                            }
+
+                            Destroy(disc.gameObject);
                         }
-                        Destroy(disc.gameObject);
                     }
                 }
-            }
-            
-            gameState.HandleGameOver(games);
-            games++;
 
-            // Should happen after discs are deleted and game variables are reset
-            if (games < 500)
-            {
-                AddStartDiscs();
+                gameState.HandleGameOver(games);
+                games++;
+
+                // Should happen after discs are deleted and game variables are reset
+                if (games < 500)
+                {
+                    AddStartDiscs();
+                }
             }
         }
         
