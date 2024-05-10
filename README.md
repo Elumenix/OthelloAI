@@ -1,0 +1,1 @@
+Credit for assets and some help for the organization of code in this project (mainly the creating Othello in Unity portion), goes to OttoBotCode, whose channel can be found here: https://www.youtube.com/@OttoBotCode 
